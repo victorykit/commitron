@@ -33,9 +33,14 @@ def run(should_demonize=true)
   demonize! if should_demonize
 
   loop do
-    find_new_commits
+    run_once
     sleep poll_interval
   end
+end
+
+def run_once
+  find_new_commits
+  check_site
 end
 
 case ARGV[0]
@@ -43,8 +48,11 @@ when 'start'
   start
 when 'stop'
   stop
+when 'restart'
+  stop
+  start
 when 'once'
-  find_new_commits
+  run_once
 else
   puts "usage: commitron start|stop"
 end  

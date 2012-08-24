@@ -10,6 +10,7 @@ module Commitron
   DEFAULT_REPO = "victorykit"
   DEFAULT_CHATROOM = "VictoryKit Chat"
   DEFAULT_POLL_INTERVAL = "60"
+  DEFAULT_SITE_URI = "act.watchdog.net"
   
   def user
     ENV["COMMITRON_USER"] || DEFAULT_USER
@@ -25,6 +26,10 @@ module Commitron
 
   def poll_interval
     ( ENV["COMMITRON_POLL_INTERVAL"] || DEFAULT_POLL_INTERVAL ).to_i
+  end
+
+  def site_uri
+    ENV["COMMITRON_SITE_URI"] || DEFAULT_SITE_URI
   end
 
   def find_new_commits
@@ -71,6 +76,15 @@ module Commitron
 
   def state_file
     [file_path, "last_commit"].join
+  end
+
+  def check_site
+    log("Checking status of site #{site_uri}")
+    status = `curl --head -s #{site_uri} | awk 'NR==1{print $2}'`
+    status.strip!
+    if status == '500'
+      broadcast_on_skype "hey idiots, the site is broken #{site_uri}"
+    end
   end
 
   def log(message)
