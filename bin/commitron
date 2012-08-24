@@ -1,23 +1,27 @@
 #!/usr/bin/env ruby
 
+require 'daemons'
 require 'commitron'
-include Commitron
 
 # Do the daemonize thing.
 
 def start
-  if !File.exists?(file_path)
-    log `mkdir -p #{file_path}`
+  if !File.exists?(Commitron.file_path)
+    log `mkdir -p #{Commitron.file_path}`
   end
 
-  head = Github.new.git_data.references.find(user, repo, 'heads/master')['object']['sha']
-  store head
+  head = Github.new.git_data.references.find(Commitron.user, Commitron.repo, 'heads/master')['object']['sha']
+  Commitron.store head
   run
   log("commitron is now started")
 end
 
+def should_daemonize?
+  ARGV[1] == "-d"
+end
+
 def stop
-  demonize!
+  daemonize!
   log "commitron is now stopped"
 end
 
@@ -25,12 +29,12 @@ def script_path
   File.expand_path(__FILE__)
 end
 
-def demonize!
+def daemonize!
   Daemons.run(script_path, dir_mode: :normal, dir: '/var/tmp/', backtrace: true, log_output: true)
 end
 
-def run(should_demonize=true)
-  demonize! if should_demonize
+def run
+  daemonize! if should_daemonize?
 
   loop do
     run_once
@@ -39,9 +43,9 @@ def run(should_demonize=true)
 end
 
 def run_once
-  find_new_commits
-  check_site
-  check_build
+  Commitron.find_new_commits
+  Commitron.check_site
+  Commitron.check_build
 end
 
 case ARGV[0]
@@ -55,5 +59,5 @@ when 'restart'
 when 'once'
   run_once
 else
-  puts "usage: commitron start|stop"
+  puts "usage: commitron start [-d] | stop"
 end  

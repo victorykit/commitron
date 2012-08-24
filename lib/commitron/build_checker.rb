@@ -20,6 +20,8 @@ module Commitron
       driver.quit
     end
 
+    private
+
     def generate_build_message(previous_build = {}, current_build = {})
       if(current_build[:status] == 'error' && previous_build[:status] == 'success')
         "#{current_build[:builder]} broke the build"
