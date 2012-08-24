@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+
+require 'commitron'
+include Commitron
+
+# Do the daemonize thing.
+
+def start
+  if !File.exists?(file_path)
+    log `mkdir -p #{file_path}`
+  end
+
+  head = Github.new.git_data.references.find(user, repo, 'heads/master')['object']['sha']
+  store head
+  run
+  log("commitron is now started")
+end
+
+def stop
+  demonize!
+  log "commitron is now stopped"
+end
+
+def script_path
+  File.expand_path(__FILE__)
+end
+
+def demonize!
+  Daemons.run(script_path, dir_mode: :normal, dir: '/var/tmp/', backtrace: true, log_output: true)
+end
+
+def run(should_demonize=true)
+  demonize! if should_demonize
+
+  loop do
+    find_new_commits
+    sleep poll_interval
+  end
+end
+
+case ARGV[0]
+when 'start'
+  start
+when 'stop'
+  stop
+when 'once'
+  find_new_commits
+else
+  puts "usage: commitron start|stop"
+end  
