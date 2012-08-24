@@ -20,5 +20,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency "libnotify"
   gem.add_dependency "github_api"
   gem.add_dependency "time-lord"
+  gem.add_dependency "selenium-webdriver"
   gem.add_development_dependency "rspec", "> 2.0.0"
 end

@@ -1,8 +1,10 @@
-require "commitron/version"
 require 'daemons'
 require 'github_api'
 require 'time-lord'
 require 'skypemac'
+require 'commitron/version'
+require 'commitron/build_checker'
+require 'commitron/rails_on_fire'
 
 module Commitron
 
@@ -11,6 +13,24 @@ module Commitron
   DEFAULT_CHATROOM = "VictoryKit Chat"
   DEFAULT_POLL_INTERVAL = "60"
   DEFAULT_SITE_URI = "act.watchdog.net"
+
+  INSULTS = [
+    "softheads",
+    "dingus",
+    "dingoes",
+    "morans",
+    "softheads",
+    "haters",
+    "gits",
+    "weenies",
+    "softheads",
+    "roundheads",
+    "commies",
+    "commit bastards",
+    "closet Bush supporters",
+    "friends",
+    "comrades"
+  ]
   
   def user
     ENV["COMMITRON_USER"] || DEFAULT_USER
@@ -30,6 +50,14 @@ module Commitron
 
   def site_uri
     ENV["COMMITRON_SITE_URI"] || DEFAULT_SITE_URI
+  end
+
+  def rof_user
+    ENV['ROF_USER']
+  end
+
+  def rof_password
+    ENV['ROF_PASSWORD']
   end
 
   def find_new_commits
@@ -78,12 +106,27 @@ module Commitron
     [file_path, "last_commit"].join
   end
 
+  def jerks
+    INSULTS[rand(INSULTS.length)]
+  end
+
   def check_site
     log("Checking status of site #{site_uri}")
     status = `curl --head -s #{site_uri} | awk 'NR==1{print $2}'`
     status.strip!
     if status == '500'
-      broadcast_on_skype "hey idiots, the site is broken #{site_uri}"
+      broadcast_on_skype "hey #{jerks}, the site is broken: #{site_uri}"
+    end
+  end
+
+  def build_checker
+    @checker ||= BuildChecker.new(rof_user, rof_password)
+  end
+
+  def check_build
+    if build_message = build_checker.run
+      puts build_message
+      #broadcast_on_skype build_message
     end
   end
 

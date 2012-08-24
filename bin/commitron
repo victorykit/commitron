@@ -41,6 +41,7 @@ end
 def run_once
   find_new_commits
   check_site
+  check_build
 end
 
 case ARGV[0]
