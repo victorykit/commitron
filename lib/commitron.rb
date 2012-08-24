@@ -125,8 +125,7 @@ module Commitron
 
   def check_build
     if build_message = build_checker.run
-      puts build_message
-      #broadcast_on_skype build_message
+      broadcast_on_skype build_message
     end
   end
 
