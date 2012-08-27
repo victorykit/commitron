@@ -1,5 +1,4 @@
 require 'github_api'
-require 'time-lord'
 require 'skypemac'
 require 'selenium-webdriver'
 
@@ -74,11 +73,9 @@ module Commitron
 
           new_commits.each do |c|
             committer = c['commit']['committer']['name']
-            commit_time = Time.parse(c['commit']['committer']['date']).ago_in_words
             message = c['commit']['message']
-            small_sha = c['sha'][0..6]
             url = "https://github.com/#{user}/#{repo}/commit/#{c['sha']}"
-            broadcast_on_skype "New commit: #{small_sha} - #{committer}, #{commit_time} : #{message} \n #{url}"
+            broadcast_on_skype "#{committer} just pushed a new commit: #{message} \n View it at #{url}"
           end
         end
 
