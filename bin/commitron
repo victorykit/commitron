@@ -38,7 +38,7 @@ def run
 
   loop do
     run_once
-    sleep poll_interval
+    sleep Commitron.poll_interval
   end
 end
 
