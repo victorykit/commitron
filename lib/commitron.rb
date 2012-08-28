@@ -74,8 +74,8 @@ module Commitron
           new_commits.each do |c|
             committer = c['commit']['committer']['name']
             message = c['commit']['message']
-            url = "https://github.com/#{user}/#{repo}/commit/#{c['sha']}"
-            broadcast_on_skype "#{committer} just pushed a new commit: #{message} \n View it at #{url}"
+            url = "https://github.com/#{user}/#{repo}/commit/#{c['sha'][0..8]}"
+            broadcast_on_skype "#{committer}: #{message}\n#{url}"
           end
         end
 
