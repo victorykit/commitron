@@ -10,11 +10,12 @@ module Commitron
       @driver.navigate.to 'http://railsonfire.com'
       login_link = @driver.find_element(id: 'login')
       login_link.click
-      emails = @driver.find_elements(id: 'user_email')
-      emails[1].send_keys @user
-      passwords = @driver.find_elements(id: 'user_password')
-      passwords[1].send_keys @password
-      sign_in_button = @driver.find_element(id: 'signin')
+      form = @driver.find_element(id: 'login_form')
+      email = form.find_element(id: 'user_email')
+      email.send_keys @user
+      password = form.find_element(id: 'user_password')
+      password.send_keys @password
+      sign_in_button = form.find_element(id: 'signin')
       sign_in_button.click
       dashboard_link = @driver.find_element(link_text: 'Dashboard')
       dashboard_link.click
