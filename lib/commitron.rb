@@ -91,10 +91,7 @@ module Commitron
     end
 
     def store(sha)
-      File.open(state_file, 'w') do |file|
-        file.puts sha
-      end
-
+      IO.write(state_file, sha)
       log "updated last known commit to #{sha}"
     end
 
@@ -107,7 +104,7 @@ module Commitron
     end
 
     def jerks
-      INSULTS[rand(INSULTS.length)]
+      INSULTS.sample
     end
 
     def check_site
@@ -129,8 +126,8 @@ module Commitron
           broadcast_on_skype build_message
         end
       rescue => ex
-        log("Error checking build: #{ex}")
-        log(ex.backtrace.join)
+        log "Error checking build: #{ex}"
+        log ex.backtrace.join
       end
     end
 
@@ -142,9 +139,9 @@ module Commitron
       chat = SkypeMac::Chat.recent_chats.find {|c|c.topic == chatroom}
       if(chat)
         chat.send_message message
-        log("Sent to Skype: #{message}")
+        log "Sent to Skype: #{message}"
       else
-        log("Could not find #{chatroom} chat on Skype")
+        log "Could not find #{chatroom} chat on Skype"
       end
     end
   end
