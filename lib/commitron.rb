@@ -1,16 +1,16 @@
 require 'github_api'
-require 'skypemac'
 require 'selenium-webdriver'
 
 require 'commitron/version'
 require 'commitron/build_checker'
 require 'commitron/rails_on_fire'
+require 'commitron/skype'
+require 'commitron/logger'
 
 module Commitron
 
   DEFAULT_USER = "victorykit"
   DEFAULT_REPO = "victorykit"
-  DEFAULT_CHATROOM = "VictoryKit Chat"
   DEFAULT_POLL_INTERVAL = "60"
   DEFAULT_SITE_URI = "act.watchdog.net"
 
@@ -33,17 +33,15 @@ module Commitron
   ]
 
   class << self
-  
+    include Skype
+    include Logger
+
     def user
       ENV["COMMITRON_USER"] || DEFAULT_USER
     end
 
     def repo
       ENV["COMMITRON_REPO"] || DEFAULT_REPO
-    end
-
-    def chatroom
-      ENV["SKYPE_CHATROOM"] || DEFAULT_CHATROOM
     end
 
     def poll_interval
@@ -79,7 +77,8 @@ module Commitron
           end
         end
 
-        store all_commits.first['sha']
+        latest_sha = all_commits.first['sha']
+        store latest_sha if last_known_commit != latest_sha
       rescue => ex
         log ex
         log ex.backtrace.join
@@ -108,9 +107,9 @@ module Commitron
     end
 
     def check_site
-      log("Checking status of site #{site_uri}")
-      status = `curl --head -s #{site_uri} | awk 'NR==1{print $2}'`
-      status.strip!
+      status = `curl --head -s #{site_uri} | awk 'NR==1{print $2}'`.strip
+      log "#{site_uri} returned #{status}"
+
       if status == '500'
         broadcast_on_skype "hey #{jerks}, the site is broken: #{site_uri}"
       end
@@ -128,20 +127,6 @@ module Commitron
       rescue => ex
         log "Error checking build: #{ex}"
         log ex.backtrace.join
-      end
-    end
-
-    def log(message)
-      puts "%-20s | %s" % [ Time.now.to_s, message ]
-    end
-
-    def broadcast_on_skype message
-      chat = SkypeMac::Chat.recent_chats.find {|c|c.topic == chatroom}
-      if(chat)
-        chat.send_message message
-        log "Sent to Skype: #{message}"
-      else
-        log "Could not find #{chatroom} chat on Skype"
       end
     end
   end

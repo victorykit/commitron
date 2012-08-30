@@ -23,8 +23,13 @@ module Commitron
     def current_build
       @driver.navigate.refresh
 
-      latest_build = @driver.find_element(xpath: "//a[contains(@class, 'boxes-success')]")
-      latest_build = latest_build.nil? ? @driver.find_element(xpath: "//a[contains(@class, 'boxes-failure')]") : latest_build
+      all_builds = @driver.find_elements(xpath: "//a[contains(@class, 'build last')]")
+
+      latest_build = all_builds.find do |b|
+        status = b.attribute("class").split(" ")[1].split("-").last
+        status == 'success' || status == 'error'
+      end
+
       status_class = latest_build.attribute("class").split(" ")[1]
       build_status = status_class.split("-").last
       user_text = latest_build.find_element(class: 'build_user').text
