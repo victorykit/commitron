@@ -124,8 +124,13 @@ module Commitron
     end
 
     def check_build
-      if build_message = build_checker.run
-        broadcast_on_skype build_message
+      begin
+        if build_message = build_checker.run
+          broadcast_on_skype build_message
+        end
+      rescue => ex
+        log("Error checking build: #{ex}")
+        log(ex.backtrace.join)
       end
     end
 
@@ -142,6 +147,5 @@ module Commitron
         log("Could not find #{chatroom} chat on Skype")
       end
     end
-
   end
 end
