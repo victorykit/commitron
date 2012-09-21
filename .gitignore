@@ -4,6 +4,7 @@
 .config
 .yardoc
 .env
+.last_announcement_timestamp
 Gemfile.lock
 InstalledFiles
 _yardoc

@@ -6,12 +6,6 @@ require 'commitron'
 # Do the daemonize thing.
 
 def start
-  if !File.exists?(Commitron.file_path)
-    log `mkdir -p #{Commitron.file_path}`
-  end
-
-  head = Github.new.git_data.references.find(Commitron.user, Commitron.repo, 'heads/master')['object']['sha']
-  Commitron.store head
   run
   log("commitron is now started")
 end
@@ -43,9 +37,8 @@ def run
 end
 
 def run_once
-  Commitron.find_new_commits
   Commitron.check_site
-  Commitron.check_build
+  Commitron.check_announcements
 end
 
 case ARGV[0]
