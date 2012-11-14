@@ -79,12 +79,13 @@ module Commitron
     end
 
     def check_site
-      status = `curl --head -s #{site_uri} | awk 'NR==1{print $2}'`.strip
-      log "#{site_uri} returned #{status}"
-
-      if status != '200'
-        broadcast_on_skype "hey #{jerks}, the site is broken: #{site_uri}"
+      for i in 0..5
+        status = `curl --head -s #{site_uri} | awk 'NR==1{print $2}'`.strip
+        log "#{site_uri} returned #{status}"
+        return if status == '200'
+        sleep 1
       end
+      broadcast_on_skype "hey #{jerks}, the site is broken: #{site_uri}"
     end
   end
 end
